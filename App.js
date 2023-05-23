@@ -114,6 +114,14 @@ export default function App() {
       );
 
       console.log(JSON.stringify(signAndSendTransactionData, null, 2));
+
+      const result = JSON.stringify(signAndSendTransactionData, null, 2);
+
+      if (Object.keys(result).includes("signature")) {
+        Alert.alert("Transaction successful");
+      } else {
+        Alert.alert("Error, please check logs");
+      }
     } else if (/onSignAllTransactions/.test(url.pathname)) {
       const signAllTransactionsData = decryptPayload(
         params.get("data"),
@@ -415,9 +423,9 @@ const generateTxn = async (method, amount, publicKey) => {
         method === "usdc" || method === "hnt" ? "spl" : "atomic"
       }`,
       data: {
-        network: "mainnet-beta",
-        amount: tokenAmount,
-        merchant: "4uca71qiJ9eB1LBgXYRUmRTzd9aYzJonBFE8c57rTpdB",
+        network: "mainnet",
+        amount: 0.009,
+        merchant: "JBkt9bcgFuAWKZRcMSza19Khxci7aXbnT1VbdFDj1un5",
         input_token: MAINNET_TOKENS[method.toUpperCase()].address,
         user: publicKey.toString(),
         reference: "HajSpXC9hrhLub3QLExsmc2G4ktH8dmFuLnMGpNmart3",
