@@ -27,6 +27,8 @@ import middleImage from "./assets/image.png";
 import bottomImage from "./assets/image_1.png";
 import DropDownPicker from "react-native-dropdown-picker";
 import { fetchTokenPrices } from "./fetchTokenPrice";
+import { RootSiblingParent } from "react-native-root-siblings";
+import Toast from "react-native-root-toast";
 
 const buildUrl = (path, params) =>
   `https://phantom.app/ul/v1/${path}?${params.toString()}`;
@@ -103,7 +105,6 @@ export default function App() {
       setSharedSecret(sharedSecretDapp);
       setSession(connectData.session);
       setPhantomWalletPublicKey(new PublicKey(connectData.public_key));
-      Alert.alert("Connected!");
     } else if (/onDisconnect/.test(url.pathname)) {
       console.log("Disconnected!");
     } else if (/onSignAndSendTransaction/.test(url.pathname)) {
@@ -118,9 +119,23 @@ export default function App() {
       const result = JSON.stringify(signAndSendTransactionData, null, 2);
 
       if (Object.keys(result).includes("signature")) {
-        Alert.alert("Transaction successful");
+        Toast.show("Transaction successful", {
+          duration: 2000,
+          position: -300,
+          containerStyle: {
+            backgroundColor: "#1b1b1b",
+          },
+          textStyle: { fontSize: 18, fontWeight: 500 },
+        });
       } else {
-        Alert.alert("Error, please check logs");
+        Toast.show("Error, please check logs", {
+          duration: 2000,
+          position: -300,
+          containerStyle: {
+            backgroundColor: "#1b1b1b",
+          },
+          textStyle: { fontSize: 18, fontWeight: 500 },
+        });
       }
     } else if (/onSignAllTransactions/.test(url.pathname)) {
       const signAllTransactionsData = decryptPayload(
@@ -206,120 +221,123 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
-      <Image style={styles.topLogo} source={topImage} />
-      <Image style={styles.middleLogo} source={middleImage} />
-      <Image style={styles.bottomLogo} source={bottomImage} />
-      {phantomWalletPublicKey != null &&
-        phantomWalletPublicKey != undefined && (
-          <View style={styles.radioGroup}>
+    <RootSiblingParent>
+      <View style={styles.container}>
+        <Image style={styles.topLogo} source={topImage} />
+        <Image style={styles.middleLogo} source={middleImage} />
+        <Image style={styles.bottomLogo} source={bottomImage} />
+        {phantomWalletPublicKey != null &&
+          phantomWalletPublicKey != undefined && (
+            <View style={styles.radioGroup}>
+              <View
+                style={{
+                  width: "33%",
+                }}
+                onTouchStart={() => {
+                  setValue("sol");
+                }}
+              >
+                <TokenCard checked={value === "sol"} token={"SOL"} />
+              </View>
+              <View
+                style={{
+                  width: "33%",
+                }}
+                onTouchStart={() => {
+                  setValue("usdc");
+                }}
+              >
+                <TokenCard checked={value === "usdc"} token={"USDC"} />
+              </View>
+              <View
+                style={{
+                  width: "33%",
+                }}
+                onTouchStart={() => {
+                  setValue("hnt");
+                }}
+              >
+                <TokenCard checked={value === "hnt"} token={"HNT"} />
+              </View>
+            </View>
+          )}
+        {phantomWalletPublicKey != null &&
+          phantomWalletPublicKey != undefined && (
             <View
               style={{
-                width: "33%",
-              }}
-              onTouchStart={() => {
-                setValue("sol");
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "#1a1a1a",
+                width: "80%",
+                alignSelf: "center",
+                borderRadius: 16,
+                marginBottom: 16,
+                paddingVertical: 8,
+                paddingHorizontal: 12,
               }}
             >
-              <TokenCard checked={value === "sol"} token={"SOL"} />
+              <Text
+                style={{
+                  fontWeight: 700,
+                  fontSize: 20,
+                  color: "white",
+                }}
+              >
+                ${amount}
+              </Text>
+              <DropDownPicker
+                style={{
+                  backgroundColor: "#4b4b4b",
+                  width: 124,
+                  alignSelf: "flex-end",
+                  marginRight: "15%",
+                }}
+                textStyle={{
+                  fontWeight: 700,
+                  fontSize: 16,
+                  color: "white",
+                }}
+                theme="DARK"
+                open={open}
+                value={option}
+                items={items}
+                setOpen={setOpen}
+                setValue={setOption}
+                setItems={setItems}
+                onChangeValue={(value) => {
+                  if (value) {
+                    setAmount(25 * value);
+                  }
+                }}
+              />
             </View>
-            <View
-              style={{
-                width: "33%",
-              }}
-              onTouchStart={() => {
-                setValue("usdc");
-              }}
-            >
-              <TokenCard checked={value === "usdc"} token={"USDC"} />
-            </View>
-            <View
-              style={{
-                width: "33%",
-              }}
-              onTouchStart={() => {
-                setValue("hnt");
-              }}
-            >
-              <TokenCard checked={value === "hnt"} token={"HNT"} />
-            </View>
-          </View>
-        )}
-      {phantomWalletPublicKey != null &&
-        phantomWalletPublicKey != undefined && (
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: "#1a1a1a",
-              width: "80%",
-              alignSelf: "center",
-              borderRadius: 16,
-              marginBottom: 16,
-              paddingVertical: 8,
-              paddingHorizontal: 12,
-            }}
-          >
-            <Text
-              style={{
-                fontWeight: 700,
-                fontSize: 20,
-                color: "white",
-              }}
-            >
-              ${amount}
-            </Text>
-            <DropDownPicker
-              style={{
-                backgroundColor: "#4b4b4b",
-                width: 124,
-                alignSelf: "flex-end",
-                marginRight: "15%",
-              }}
-              textStyle={{
-                fontWeight: 700,
-                fontSize: 16,
-                color: "white",
-              }}
-              theme="DARK"
-              open={open}
-              value={option}
-              items={items}
-              setOpen={setOpen}
-              setValue={setOption}
-              setItems={setItems}
-              onChangeValue={(value) => {
-                if (value) {
-                  setAmount(25 * value);
-                }
-              }}
-            />
-          </View>
-        )}
-      <Pressable
-        style={styles.button}
-        onPress={async () => {
-          if (
-            phantomWalletPublicKey != null &&
+          )}
+        <Pressable
+          style={styles.button}
+          onPress={async () => {
+            if (
+              phantomWalletPublicKey != null &&
+              phantomWalletPublicKey != undefined
+            ) {
+              console.log(value);
+              buy();
+            } else {
+              connect();
+            }
+          }}
+        >
+          <Text style={styles.buttonText}>
+            {phantomWalletPublicKey != null &&
             phantomWalletPublicKey != undefined
-          ) {
-            console.log(value);
-            buy();
-          } else {
-            connect();
-          }
-        }}
-      >
-        <Text style={styles.buttonText}>
-          {phantomWalletPublicKey != null && phantomWalletPublicKey != undefined
-            ? "Pay now"
-            : "Connect Wallet"}
-        </Text>
-        {loading && <ActivityIndicator animating={true} color={"black"} />}
-      </Pressable>
-      <StatusBar style="auto" />
-    </View>
+              ? "Pay now"
+              : "Connect Wallet"}
+          </Text>
+          {loading && <ActivityIndicator animating={true} color={"black"} />}
+        </Pressable>
+        <StatusBar style="auto" />
+      </View>
+    </RootSiblingParent>
   );
 }
 
@@ -426,7 +444,9 @@ const generateTxn = async (method, amount, publicKey) => {
         network: "mainnet",
         amount: 0.009,
         merchant: "JBkt9bcgFuAWKZRcMSza19Khxci7aXbnT1VbdFDj1un5",
-        input_token: MAINNET_TOKENS[method.toUpperCase()].address,
+        ...(method === "sol"
+          ? { input_token: MAINNET_TOKENS[method.toUpperCase()].address }
+          : { token_address: MAINNET_TOKENS[method.toUpperCase()].address }),
         user: publicKey.toString(),
         reference: "HajSpXC9hrhLub3QLExsmc2G4ktH8dmFuLnMGpNmart3",
         fee: 0.0001,
