@@ -438,6 +438,6 @@ const generateTxn = async (method, amount, publicKey) => {
 
     return Transaction.from(Buffer.from(data.transaction, "base64"));
   } catch (error) {
-    console.log("TXN ERRRRRORRR****", error, error.response.data);
+    console.log("TXN ERRRRRORRR****", error.toJSON(), error.response.data);
   }
 };
