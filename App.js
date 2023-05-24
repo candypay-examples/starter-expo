@@ -18,7 +18,7 @@ import {
 } from "react-native";
 import nacl from "tweetnacl";
 import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { MAINNET_TOKENS, MainnetTokens } from "./tokens";
 import { RadioButton, ActivityIndicator } from "react-native-paper";
 import TokenCard from "./tokenCard";
@@ -438,6 +438,6 @@ const generateTxn = async (method, amount, publicKey) => {
 
     return Transaction.from(Buffer.from(data.transaction, "base64"));
   } catch (error) {
-    console.log("TXN ERRRRRORRR****", error);
+    console.log("TXN ERRRRRORRR****", error, error.response.data);
   }
 };
