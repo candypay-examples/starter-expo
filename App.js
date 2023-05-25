@@ -280,7 +280,7 @@ export default function App() {
                 flexDirection: "row",
                 alignItems: "center",
                 backgroundColor: "#1a1a1a",
-                width: "80%",
+                width: "75%",
                 alignSelf: "center",
                 borderRadius: 16,
                 marginBottom: 16,
