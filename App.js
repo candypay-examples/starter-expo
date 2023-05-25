@@ -29,6 +29,16 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { fetchTokenPrices } from "./fetchTokenPrice";
 import { RootSiblingParent } from "react-native-root-siblings";
 import Toast from "react-native-root-toast";
+import { CANDYPAY_PRIVATE_KEY, CANDYPAY_PUBLIC_KEY } from "./secrets";
+import { decode, encode } from "base-64";
+
+if (!global.btoa) {
+  global.btoa = encode;
+}
+
+if (!global.atob) {
+  global.atob = decode;
+}
 
 const buildUrl = (path, params) =>
   `https://phantom.app/ul/v1/${path}?${params.toString()}`;
@@ -50,6 +60,7 @@ export default function App() {
   const [value, setValue] = useState("sol");
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(25);
+  const [paymentLink, setPaymentLink] = useState("");
 
   const [open, setOpen] = useState(false);
   const [option, setOption] = useState(1);
@@ -91,20 +102,20 @@ export default function App() {
 
     if (/onConnect/.test(url.pathname)) {
       console.log("connected");
-      const sharedSecretDapp = nacl.box.before(
-        bs58.decode(params.get("phantom_encryption_public_key")),
-        dappKeyPair.secretKey
-      );
+      // const sharedSecretDapp = nacl.box.before(
+      //   bs58.decode(params.get("phantom_encryption_public_key")),
+      //   dappKeyPair.secretKey
+      // );
 
-      const connectData = decryptPayload(
-        params.get("data"),
-        params.get("nonce"),
-        sharedSecretDapp
-      );
+      // const connectData = decryptPayload(
+      //   params.get("data"),
+      //   params.get("nonce"),
+      //   sharedSecretDapp
+      // );
 
-      setSharedSecret(sharedSecretDapp);
-      setSession(connectData.session);
-      setPhantomWalletPublicKey(new PublicKey(connectData.public_key));
+      // setSharedSecret(sharedSecretDapp);
+      // setSession(connectData.session);
+      // setPhantomWalletPublicKey(new PublicKey(connectData.public_key));
     } else if (/onDisconnect/.test(url.pathname)) {
       console.log("Disconnected!");
     } else if (/onSignAndSendTransaction/.test(url.pathname)) {
@@ -222,47 +233,47 @@ export default function App() {
 
   return (
     <RootSiblingParent>
-      <View style={styles.container}>
-        <Image style={styles.topLogo} source={topImage} />
-        <Image style={styles.middleLogo} source={middleImage} />
-        <Image style={styles.bottomLogo} source={bottomImage} />
-        {phantomWalletPublicKey != null &&
-          phantomWalletPublicKey != undefined && (
-            <View style={styles.radioGroup}>
-              <View
-                style={{
-                  width: "33%",
-                }}
-                onTouchStart={() => {
-                  setValue("sol");
-                }}
-              >
-                <TokenCard checked={value === "sol"} token={"SOL"} />
+      {
+        <View style={styles.container}>
+          <Image style={styles.topLogo} source={topImage} />
+          <Image style={styles.middleLogo} source={middleImage} />
+          <Image style={styles.bottomLogo} source={bottomImage} />
+          {phantomWalletPublicKey != null &&
+            phantomWalletPublicKey != undefined && (
+              <View style={styles.radioGroup}>
+                <View
+                  style={{
+                    width: "33%",
+                  }}
+                  onTouchStart={() => {
+                    setValue("sol");
+                  }}
+                >
+                  <TokenCard checked={value === "sol"} token={"SOL"} />
+                </View>
+                <View
+                  style={{
+                    width: "33%",
+                  }}
+                  onTouchStart={() => {
+                    setValue("usdc");
+                  }}
+                >
+                  <TokenCard checked={value === "usdc"} token={"USDC"} />
+                </View>
+                <View
+                  style={{
+                    width: "33%",
+                  }}
+                  onTouchStart={() => {
+                    setValue("hnt");
+                  }}
+                >
+                  <TokenCard checked={value === "hnt"} token={"HNT"} />
+                </View>
               </View>
-              <View
-                style={{
-                  width: "33%",
-                }}
-                onTouchStart={() => {
-                  setValue("usdc");
-                }}
-              >
-                <TokenCard checked={value === "usdc"} token={"USDC"} />
-              </View>
-              <View
-                style={{
-                  width: "33%",
-                }}
-                onTouchStart={() => {
-                  setValue("hnt");
-                }}
-              >
-                <TokenCard checked={value === "hnt"} token={"HNT"} />
-              </View>
-            </View>
-          )}
-        {phantomWalletPublicKey != null &&
-          phantomWalletPublicKey != undefined && (
+            )}
+          {
             <View
               style={{
                 display: "flex",
@@ -312,31 +323,35 @@ export default function App() {
                 }}
               />
             </View>
-          )}
-        <Pressable
-          style={styles.button}
-          onPress={async () => {
-            if (
-              phantomWalletPublicKey != null &&
-              phantomWalletPublicKey != undefined
-            ) {
-              console.log(value);
-              buy();
-            } else {
-              connect();
-            }
-          }}
-        >
-          <Text style={styles.buttonText}>
-            {phantomWalletPublicKey != null &&
+          }
+          <Pressable
+            style={styles.button}
+            onPress={async () => {
+              const url = await generatePayLink();
+              setPaymentLink(url);
+              // if (
+              //   phantomWalletPublicKey != null &&
+              //   phantomWalletPublicKey != undefined
+              // ) {
+              //   console.log(value);
+              //   buy();
+              // } else {
+              //   connect();
+              // }
+            }}
+          >
+            <Text style={styles.buttonText}>
+              {/* {phantomWalletPublicKey != null &&
             phantomWalletPublicKey != undefined
               ? "Pay now"
-              : "Connect Wallet"}
-          </Text>
-          {loading && <ActivityIndicator animating={true} color={"black"} />}
-        </Pressable>
-        <StatusBar style="auto" />
-      </View>
+              : "Connect Wallet"} */}
+              Pay now
+            </Text>
+            {loading && <ActivityIndicator animating={true} color={"black"} />}
+          </Pressable>
+          <StatusBar style="auto" />
+        </View>
+      }
     </RootSiblingParent>
   );
 }
@@ -459,5 +474,52 @@ const generateTxn = async (method, amount, publicKey) => {
     return Transaction.from(Buffer.from(data.transaction, "base64"));
   } catch (error) {
     console.log("TXN ERRRRRORRR****", error.toJSON(), error.response.data);
+  }
+};
+
+const generatePayLink = async () => {
+  try {
+    const body = {
+      network: "devnet",
+      success_url: "elements-sample://onConnect",
+      cancel_url: "elements-sample://onConnect",
+      items: [
+        {
+          name: "Subscription",
+          price: 25,
+          image: "https://imgur.com/tF3MaTI.png",
+          quantity: 1,
+        },
+      ],
+      config: {
+        collect_shipping_address: false,
+      },
+    };
+
+    const { data } = await axios.request({
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${CANDYPAY_PRIVATE_KEY}`,
+      },
+      url: "https://checkout-api.candypay.fun/api/v1/session",
+      data: body,
+    });
+
+    console.log(data.session_id);
+
+    const payment = await axios.request({
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${CANDYPAY_PUBLIC_KEY}`,
+      },
+      url: `https://checkout-api.candypay.fun/api/v1/session/payment_url?session_id=${data.session_id}`,
+    });
+
+    console.log(payment.data.payment_url);
+    Linking.openURL(payment.data.payment_url);
+
+    return payment.data.payment_url;
+  } catch (error) {
+    console.log("ERROR", error);
   }
 };
