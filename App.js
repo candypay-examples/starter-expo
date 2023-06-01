@@ -114,8 +114,8 @@ const generatePayLink = async (amount) => {
   try {
     const body = {
       network: "devnet",
-      success_url: "elements-sample://onConnect",
-      cancel_url: "elements-sample://onConnect",
+      success_url: "https://elements-test.vercel.app/success",
+      cancel_url: "https://elements-test.vercel.app/",
       items: [
         {
           name: "Subscription",
