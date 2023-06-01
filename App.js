@@ -20,7 +20,6 @@ export default function App() {
   const [deepLink, setDeepLink] = useState("");
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(25);
-
   const [open, setOpen] = useState(false);
   const [option, setOption] = useState(1);
   const [items, setItems] = useState([
@@ -46,9 +45,9 @@ export default function App() {
     setDeepLink(url);
   };
 
-  // handle inbounds links
+  // handle inbound links
   useEffect(() => {
-    console.log("handle inbounds links");
+    console.log("handle inbound links");
     if (!deepLink) return;
 
     const url = new URL(deepLink);
@@ -100,8 +99,7 @@ export default function App() {
               setLoading(false);
             }}
           >
-            <Text style={styles.buttonText}>Pay now</Text>
-            {loading && <ActivityIndicator animating={true} color={"black"} />}
+            {loading ? <ActivityIndicator animating={true} color={"black"} /> : <Text style={styles.buttonText}>Pay now</Text>}
           </Pressable>
           <StatusBar style="auto" />
         </View>
@@ -118,12 +116,13 @@ const generatePayLink = async (amount) => {
       cancel_url: "https://elements-test.vercel.app/",
       items: [
         {
-          name: "Subscription",
-          price: amount,
-          image: "https://imgur.com/tF3MaTI.png",
-          quantity: 1,
+          name: "Subscribe to Helium",
+          price: amount, // amount to be paid in USD
+          image: "https://i.ibb.co/cYFvxhy/feature2-removebg-preview.png",
+          quantity: amount / 25, // number of months, the subscription is purchased for.
         },
       ],
+      tokens: ["hnt", "samo"], // tokens to allow paying with, SOL and USDC comes by default
       config: {
         collect_shipping_address: false,
       },
@@ -137,7 +136,8 @@ const generatePayLink = async (amount) => {
       url: "https://checkout-api.candypay.fun/api/v1/session",
       data: body,
     });
-
+    
+    // Create a payment session for the amount to be charged
     console.log(data.session_id);
 
     const payment = await axios.request({
@@ -148,6 +148,7 @@ const generatePayLink = async (amount) => {
       url: `https://checkout-api.candypay.fun/api/v1/session/payment_url?session_id=${data.session_id}`,
     });
 
+    // Retrive the payment URL from created session_id, users can visit and pay on
     console.log(payment.data.payment_url);
     Linking.openURL(payment.data.payment_url);
 
